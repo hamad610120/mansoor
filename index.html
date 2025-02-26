@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل طلبات عملاء مؤسسة المنصور التجارية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .button {
+            padding: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            margin: 10px;
+            text-align: center;
+        }
+        .card img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+        .card-content {
+            margin-top: 10px;
+        }
+        .input-quantity {
+            margin-top: 10px;
+            padding: 5px;
+            width: 100%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1 style="text-align: center;">تسجيل طلبات عملاء مؤسسة المنصور التجارية ALMANSOOR</h1>
+
+    <div id="categories" style="display: flex; flex-wrap: wrap;">
+        <!-- Categories will be dynamically added here -->
+    </div>
+
+    <div id="products" style="display: none; flex-wrap: wrap;">
+        <!-- Products will be dynamically added here -->
+    </div>
+
+    <button id="sendOrderBtn" class="button" style="display: none;" onclick="sendOrder()">إرسال الطلب عبر واتساب</button>
+
+    <script>
+        const categories = Array.from({ length: 10 }, (_, i) => ({
+            id: i,
+            name: `قسم ${i + 1}`,
+            image: "https://via.placeholder.com/200"
+        }));
+
+        const products = Array.from({ length: 10 }, (_, i) => ({
+            id: i,
+            name: `منتج ${i + 1}`,
+            image: "https://via.placeholder.com/150"
+        }));
+
+        let cart = [];
+        let selectedCategory = null;
+
+        // Function to update categories on page
+        function displayCategories() {
+            const categoriesDiv = document.getElementById('categories');
+            categoriesDiv.innerHTML = ''; // Clear categories div
+
+            categories.forEach(category => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => displayProducts(category.id);
+                card.innerHTML = `
+                    <img src="${category.image}" alt="${category.name}" />
+                    <div class="card-content">
+                        <h3>${category.name}</h3>
+                    </div>
+                `;
+                categoriesDiv.appendChild(card);
+            });
+        }
+
+        // Function to display products when a category is selected
+        function displayProducts(categoryId) {
+            selectedCategory = categoryId;
+            const productsDiv = document.getElementById('products');
+            const categoriesDiv = document.getElementById('categories');
+            categoriesDiv.style.display = 'none';
+            productsDiv.style.display = 'flex';
+            productsDiv.innerHTML = ''; // Clear previous products
+
+            products.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => addToCart(product);
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" />
+                    <div class="card-content">
+                        <h3>${product.name}</h3>
+                        ${cart.find(item => item.id === product.id) ? `
+                            <input type="number" class="input-quantity" min="1" value="${cart.find(item => item.id === product.id)?.quantity || 1}" onchange="updateQuantity(${product.id}, this.value)" />
+                        ` : ''}
+                    </div>
+                `;
+                productsDiv.appendChild(card);
+            });
+
+            document.getElementById('sendOrderBtn').style.display = 'block';
+        }
+
+        // Add product to cart
+        function addToCart(product) {
+            const existingItem = cart.find(item => item.id === product.id);
+            if (!existingItem) {
+                cart.push({ ...product, quantity: 1 });
+            }
+        }
+
+        // Update quantity of a product in the cart
+        function updateQuantity(productId, quantity) {
+            cart = cart.map(item => item.id === productId ? { ...item, quantity: parseInt(quantity) } : item);
+        }
+
+        // Send order via WhatsApp
+        function sendOrder() {
+            if (cart.length === 0) {
+                alert("لم تختر أي منتجات!");
+                return;
+            }
+
+            const orderText = cart.map(item => `${item.name} - الكمية: ${item.quantity}`).join("%0A");
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=967770289229&text=${orderText}`;
+            window.open(whatsappUrl, "_blank");
+        }
+
+        // Start by displaying categories
+        displayCategories();
+    </script>
+</body>
+</html>
